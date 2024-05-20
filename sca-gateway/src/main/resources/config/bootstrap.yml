@@ -1,33 +1,43 @@
 server:
-  port: 48080
+  port: 40000
   servlet:
     context-path: /sca_gateway
 
 spring:
   application:
     name: sca-gateway
+  profiles:
+    active: dev
   cloud:
     nacos:
       discovery:
         server-addr: 117.73.12.23:48848
         username: nacos
         password: Y123456a?
-    gateway:
+        namespace: dev
+        group: sca
+      config:
+        server-addr: 117.73.12.23:48848
+        username: nacos
+        password: Y123456a?
+        namespace: dev
+        group: sca
+        file-extension: yml
+
+#    gateway:
 #      routes:
-#        - id: stock_route # 当前路由的标识, 要求唯一
-#
+#        - id: sca_auth_route # 当前路由的标识, 要求唯一
 #          # 请求要转发到的地址
 #          # 1.单独使用 gateway,
 #          # uri: http://localhost:10001
 #          # 2.使用nacos, lb 指的是从 nacos 中按照名称获取微服务,并遵循负载均衡策略
-#          uri: lb://stock-nacos
-#
+#          uri: lb://sca-auth
 #          order: 1 # 路由的优先级, 数字越小优先级越高
 #          predicates: # 断言, 就是路由转发要满足的条件
-#            - Path=/sca_gateway/stock/** # 当请求路径满足Path指定的规则时才进行路由转发
+#            - Path=/sca_gateway/sca_auth/** # 当请求路径满足Path指定的规则时才进行路由转发
 #          filters: # 过滤器, 请求在传递过程中可以通过过滤器对其进行一定的修改
 #            - StripPrefix=1 # 转发之前去掉一层路径
-#
+
 #        - id: product_route # 当前路由的标识, 要求唯一
 #
 #          # 请求要转发到的地址
