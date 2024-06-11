@@ -26,6 +26,6 @@ public class UserDetailsServiceImpl implements UserDetailsService {
         //2.封装用户相关信息并返回
         return new User(username,
                 encodePassword,//必须是已经加密的密码
-                AuthorityUtils.createAuthorityList("sys:res:create", "sys:res:retrieve")); //权限
+                AuthorityUtils.createAuthorityList("USER", "sys:res:create", "sys:res:retrieve")); //权限
     }
 }

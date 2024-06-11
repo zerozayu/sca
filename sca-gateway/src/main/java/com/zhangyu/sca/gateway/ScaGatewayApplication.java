@@ -13,5 +13,6 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 public class ScaGatewayApplication {
     public static void main(String[] args) {
         SpringApplication.run(ScaGatewayApplication.class, args);
+        System.out.println("=============sca-gateway started.=============");
     }
 }

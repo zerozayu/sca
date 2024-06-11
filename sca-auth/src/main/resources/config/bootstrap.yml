@@ -1,11 +1,13 @@
 server:
   port: 41000
   servlet:
-    context-path: /sca_auth
+    context-path: /auth
 
 spring:
   application:
     name: sca-auth
+  profiles:
+    active: dev
   cloud:
     nacos:
       discovery:
@@ -20,3 +22,4 @@ spring:
         password: Y123456a?
         namespace: dev
         group: sca
+        file-extension: yml

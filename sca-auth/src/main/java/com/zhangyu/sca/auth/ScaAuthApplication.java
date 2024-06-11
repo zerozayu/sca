@@ -13,5 +13,6 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 public class ScaAuthApplication {
     public static void main(String[] args) {
         SpringApplication.run(ScaAuthApplication.class, args);
+        System.out.println("=============sca-auth started.=============");
     }
 }
