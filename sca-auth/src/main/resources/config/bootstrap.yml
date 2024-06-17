@@ -33,3 +33,20 @@ spring:
         namespace: dev
         group: sca
         file-extension: yml
+  # 数据源配置
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://117.73.12.23:43306/sca_auth?useUnicode=true&characterEncoding=UTF-8&allowMultiQueries=true&rewriteBatchedStatements=true&useSSL=false&serverTimezone=GMT%2B8
+    username: root
+    password: Y123456a
+  flyway:
+    enabled: true
+    # 禁止清理数据库表
+    clean-disabled: true
+    # 如果数据库不是空表，需要设置成 true，否则启动报错
+    baseline-on-migrate: true
+    # 与 baseline-on-migrate: true 搭配使用
+    baseline-version: 0
+    locations:
+      - classpath:db/migration/mysql
+

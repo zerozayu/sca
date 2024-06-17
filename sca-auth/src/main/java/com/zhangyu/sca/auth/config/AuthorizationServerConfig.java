@@ -2,32 +2,31 @@ package com.zhangyu.sca.auth.config;
 
 import com.nimbusds.jose.jwk.JWKSet;
 import com.nimbusds.jose.jwk.RSAKey;
-import com.nimbusds.jose.jwk.source.ImmutableJWKSet;
 import com.nimbusds.jose.jwk.source.JWKSource;
 import com.nimbusds.jose.proc.SecurityContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Import;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.MediaType;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.oauth2.core.AuthorizationGrantType;
-import org.springframework.security.oauth2.core.ClientAuthenticationMethod;
-import org.springframework.security.oauth2.core.oidc.OidcScopes;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
-import org.springframework.security.oauth2.server.authorization.client.InMemoryRegisteredClientRepository;
-import org.springframework.security.oauth2.server.authorization.client.RegisteredClient;
+import org.springframework.security.oauth2.server.authorization.JdbcOAuth2AuthorizationConsentService;
+import org.springframework.security.oauth2.server.authorization.JdbcOAuth2AuthorizationService;
+import org.springframework.security.oauth2.server.authorization.OAuth2AuthorizationConsentService;
+import org.springframework.security.oauth2.server.authorization.OAuth2AuthorizationService;
+import org.springframework.security.oauth2.server.authorization.client.JdbcRegisteredClientRepository;
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClientRepository;
 import org.springframework.security.oauth2.server.authorization.config.annotation.web.configuration.OAuth2AuthorizationServerConfiguration;
 import org.springframework.security.oauth2.server.authorization.config.annotation.web.configurers.OAuth2AuthorizationServerConfigurer;
 import org.springframework.security.oauth2.server.authorization.settings.AuthorizationServerSettings;
-import org.springframework.security.oauth2.server.authorization.settings.ClientSettings;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
 import org.springframework.security.web.util.matcher.MediaTypeRequestMatcher;
+import org.springframework.security.web.util.matcher.RequestMatcher;
 
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
@@ -44,6 +43,8 @@ import java.util.UUID;
 @Configuration(proxyBeanMethods = false)
 // @Import(OAuth2AuthorizationServerConfiguration.class)
 public class AuthorizationServerConfig {
+
+    private static final String CUSTOM_CONSENT_PAGE_URI = "/oauth2/consent";
 
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
 
@@ -64,43 +65,87 @@ public class AuthorizationServerConfig {
     @Order(Ordered.HIGHEST_PRECEDENCE)
     public SecurityFilterChain authorizationServerSecurityFilterChain(HttpSecurity http) throws Exception {
 
-        OAuth2AuthorizationServerConfiguration.applyDefaultSecurity(http);
-        http.getConfigurer(OAuth2AuthorizationServerConfigurer.class)
-                .oidc(Customizer.withDefaults()); //配置 OpenID Connect 1.0 支持
+        // OAuth2AuthorizationServerConfiguration.applyDefaultSecurity(http);
+        // http.getConfigurer(OAuth2AuthorizationServerConfigurer.class)
+        //         .oidc(Customizer.withDefaults()); //配置 OpenID Connect 1.0 支持
+
+        // 定义授权配置服务器
+        OAuth2AuthorizationServerConfigurer configurer = new OAuth2AuthorizationServerConfigurer();
+        configurer
+                // 自定义授权页面
+                .authorizationEndpoint(oAuth2AuthorizationEndpointConfigurer ->
+                        oAuth2AuthorizationEndpointConfigurer.consentPage(CUSTOM_CONSENT_PAGE_URI))
+                .oidc(Customizer.withDefaults());
+
+        // 获取授权服务器相关的请求端点
+        RequestMatcher endpointsMatcher = configurer.getEndpointsMatcher();
 
         http
+                // 拦截对授权服务器相关端点的请求
+                .securityMatcher(endpointsMatcher)
+                // 拦截到的请求都需要认证
+                .authorizeHttpRequests(authorizationManagerRequestMatcherRegistry -> authorizationManagerRequestMatcherRegistry
+                        .anyRequest().authenticated())
+                // 忽略掉相关端点的 CSRF（跨站请求）：对授权端点的访问是可以跨站的
+                .csrf(csrf -> csrf.ignoringRequestMatchers(endpointsMatcher))
+                .oauth2ResourceServer(resourceServer -> resourceServer
+                        .jwt(Customizer.withDefaults()))
                 .exceptionHandling((exceptions) -> exceptions
                         .defaultAuthenticationEntryPointFor(
                                 new LoginUrlAuthenticationEntryPoint("/login"),
                                 new MediaTypeRequestMatcher(MediaType.TEXT_HTML)
                         )
                 )
-                .oauth2ResourceServer((resourceServer) -> resourceServer
-                        .jwt(Customizer.withDefaults()));
+                // 访问端点时表单登录
+                .formLogin(Customizer.withDefaults())
+                // 应用授权服务器的配置
+                .with(configurer, Customizer.withDefaults());
 
         return http.build();
     }
 
-
+    /**
+     * 注册客户端应用, 对应 oauth2_registered_client 表
+     *
+     * @param jdbcTemplate
+     * @return {@link RegisteredClientRepository}
+     * @throws
+     * @author zhangyu
+     * @date 2024/6/12 17:35
+     */
     @Bean
-    public RegisteredClientRepository registeredClientRepository() {
-        RegisteredClient oidcClient = RegisteredClient.withId(UUID.randomUUID().toString())
-                .clientId("demo-client")
-                .clientSecret(bCryptPasswordEncoder.encode("123456"))
-                .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)
-                .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
-                .authorizationGrantType(AuthorizationGrantType.REFRESH_TOKEN)
-                .authorizationGrantType(AuthorizationGrantType.CLIENT_CREDENTIALS)
-                .redirectUri("https://127.0.0.1:41000/auth/login/oauth2/code/oidc-client")
-                .redirectUri("https://www.baidu.com")
-                // .postLogoutRedirectUri("http://127.0.0.1:40000/gateway/auth/")
-                .scope(OidcScopes.OPENID)
-                .scope(OidcScopes.PROFILE)
-                .scope("message.read")
-                .clientSettings(ClientSettings.builder().requireAuthorizationConsent(true).build())
-                .build();
+    public RegisteredClientRepository registeredClientRepository(JdbcTemplate jdbcTemplate) {
+        return new JdbcRegisteredClientRepository(jdbcTemplate);
+    }
 
-        return new InMemoryRegisteredClientRepository(oidcClient);
+    /**
+     * 令牌的发放记录, 对应 oauth2_authorization 表
+     *
+     * @param jdbcTemplate
+     * @param registeredClientRepository
+     * @return {@link OAuth2AuthorizationService}
+     * @throws
+     * @author zhangyu
+     * @date 2024/6/12 17:37
+     */
+    @Bean
+    public OAuth2AuthorizationService authorizationService(JdbcTemplate jdbcTemplate, RegisteredClientRepository registeredClientRepository) {
+        return new JdbcOAuth2AuthorizationService(jdbcTemplate, registeredClientRepository);
+    }
+
+    /**
+     * 把资源拥有者授权确认操作保存到数据库, 对应 oauth2_authorization_consent 表
+     *
+     * @param jdbcTemplate
+     * @param registeredClientRepository
+     * @return {@link OAuth2AuthorizationConsentService}
+     * @throws
+     * @author zhangyu
+     * @date 2024/6/12 17:39
+     */
+    @Bean
+    public OAuth2AuthorizationConsentService authorizationConsentService(JdbcTemplate jdbcTemplate, RegisteredClientRepository registeredClientRepository) {
+        return new JdbcOAuth2AuthorizationConsentService(jdbcTemplate, registeredClientRepository);
     }
 
     /**
@@ -122,7 +167,8 @@ public class AuthorizationServerConfig {
                 .keyID(UUID.randomUUID().toString())
                 .build();
         JWKSet jwkSet = new JWKSet(rsaKey);
-        return new ImmutableJWKSet<>(jwkSet);
+        // return new ImmutableJWKSet<>(jwkSet);
+        return (jwtSelector, securityContext) -> jwtSelector.select(jwkSet);
     }
 
     /**

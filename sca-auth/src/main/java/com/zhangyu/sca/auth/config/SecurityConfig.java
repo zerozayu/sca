@@ -10,7 +10,11 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
+import org.springframework.security.provisioning.JdbcUserDetailsManager;
+import org.springframework.security.provisioning.UserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
+
+import javax.sql.DataSource;
 
 /**
  * spring security配置类
@@ -19,8 +23,14 @@ import org.springframework.security.web.SecurityFilterChain;
  * @date 2024/5/20 11:52
  */
 @EnableWebSecurity
-@Configuration(proxyBeanMethods = false)
+@Configuration
 public class SecurityConfig {
+
+    private final DataSource dataSource;
+
+    public SecurityConfig(DataSource dataSource) {
+        this.dataSource = dataSource;
+    }
 
     /**
      * 用于身份验证的
@@ -35,10 +45,10 @@ public class SecurityConfig {
     public SecurityFilterChain defaultSecurityFilterChain(HttpSecurity http) throws Exception {
         http
                 .authorizeHttpRequests((authorize -> authorize
-                        .requestMatchers("/login", "/error", "/logout").permitAll()
+                        .requestMatchers("/login", "/api/**").permitAll()
                         .anyRequest().authenticated())
                 )
-                .formLogin(Customizer.withDefaults());
+                .formLogin(formLoginConfigurer -> formLoginConfigurer.loginPage("/login"));
         return http.build();
     }
 
@@ -51,15 +61,20 @@ public class SecurityConfig {
         return new BCryptPasswordEncoder();
     }
 
-    @Bean
-    public UserDetailsService userDetailsService() {
-        UserDetails user = User.builder()
-                .username("zhangyu")
-                .password("123456")
-                .passwordEncoder(password -> bCryptPasswordEncoder().encode(password))
-                .roles("USER")
-                .build();
+    // @Bean
+    // public UserDetailsService userDetailsService() {
+    //     UserDetails user = User.builder()
+    //             .username("zhangyu")
+    //             .password("123456")
+    //             .passwordEncoder(password -> bCryptPasswordEncoder().encode(password))
+    //             .roles("USER")
+    //             .build();
+    //
+    //     return new InMemoryUserDetailsManager(user);
+    // }
 
-        return new InMemoryUserDetailsManager(user);
+    @Bean
+    public UserDetailsManager userDetailsManager() {
+        return new JdbcUserDetailsManager(dataSource);
     }
 }

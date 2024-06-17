@@ -34,10 +34,63 @@
             <groupId>com.alibaba.cloud</groupId>
             <artifactId>spring-cloud-starter-alibaba-nacos-config</artifactId>
         </dependency>
-
+        <!-- 验证服务器 -->
         <dependency>
             <groupId>org.springframework.security</groupId>
             <artifactId>spring-security-oauth2-authorization-server</artifactId>
         </dependency>
+        <!-- 数据库 -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-jdbc</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.mysql</groupId>
+            <artifactId>mysql-connector-j</artifactId>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/org.flywaydb/flyway-mysql -->
+        <dependency>
+            <groupId>org.flywaydb</groupId>
+            <artifactId>flyway-mysql</artifactId>
+            <version>10.15.0</version>
+        </dependency>
+        <!-- 添加spring security cas支持
+        这里需添加spring-security-cas依赖，否则启动时报java.lang.ClassNotFoundException: org.springframework.security.cas.jackson2.CasJackson2Module错误。-->
+        <dependency>
+            <groupId>org.springframework.security</groupId>
+            <artifactId>spring-security-cas</artifactId>
+        </dependency>
+
     </dependencies>
+    <!-- <build> -->
+    <!--     <plugins> -->
+    <!--         <plugin> -->
+    <!--             <groupId>org.flywaydb</groupId> -->
+    <!--             <artifactId>flyway-maven-plugin</artifactId> -->
+    <!--             <version>10.15.0</version> &lt;!&ndash; 根据你需要的版本进行设置 &ndash;&gt; -->
+    <!--             <configuration> -->
+    <!--                 &lt;!&ndash; 数据库连接配置 &ndash;&gt; -->
+    <!--                 <url>jdbc:mysql://117.73.12.23:43306/sca_auth?useUnicode=true&amp;characterEncoding=UTF-8&amp;allowMultiQueries=true&amp;rewriteBatchedStatements=true&amp;useSSL=false&amp;serverTimezone=GMT%2B8</url> -->
+    <!--                 <user>root</user> -->
+    <!--                 <password>Y123456a</password> -->
+
+    <!--                 &lt;!&ndash; 数据库驱动程序 &ndash;&gt; -->
+    <!--                 <driver>com.mysql.jdbc.Driver</driver> -->
+
+    <!--                 &lt;!&ndash; Flyway 扫描迁移脚本的位置 &ndash;&gt; -->
+    <!--                 <locations> -->
+    <!--                     <location>filesystem:src/main/resources/db/migration/mysql</location> -->
+    <!--                 </locations> -->
+    <!--             </configuration> -->
+    <!--             <dependencies> -->
+    <!--                 &lt;!&ndash; Flyway 插件依赖的数据库驱动 &ndash;&gt; -->
+    <!--                 <dependency> -->
+    <!--                     <groupId>mysql</groupId> -->
+    <!--                     <artifactId>mysql-connector-j</artifactId> -->
+    <!--                     <version>8.3.0</version> -->
+    <!--                 </dependency> -->
+    <!--             </dependencies> -->
+    <!--         </plugin> -->
+    <!--     </plugins> -->
+    <!-- </build> -->
 </project>
