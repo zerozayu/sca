@@ -25,6 +25,7 @@ import org.springframework.security.oauth2.server.authorization.config.annotatio
 import org.springframework.security.oauth2.server.authorization.settings.AuthorizationServerSettings;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.security.web.util.matcher.MediaTypeRequestMatcher;
 import org.springframework.security.web.util.matcher.RequestMatcher;
 
@@ -33,6 +34,8 @@ import java.security.KeyPairGenerator;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
 import java.util.UUID;
+
+import static java.util.Collections.singletonList;
 
 /**
  * Authorization Server 配置类
@@ -72,7 +75,7 @@ public class AuthorizationServerConfig {
         // 定义授权配置服务器
         OAuth2AuthorizationServerConfigurer configurer = new OAuth2AuthorizationServerConfigurer();
         configurer
-                // 自定义授权页面
+                // 自定义授权页面  / oauth2/**
                 .authorizationEndpoint(oAuth2AuthorizationEndpointConfigurer ->
                         oAuth2AuthorizationEndpointConfigurer.consentPage(CUSTOM_CONSENT_PAGE_URI))
                 .oidc(Customizer.withDefaults());

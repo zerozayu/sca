@@ -21,24 +21,24 @@ spring:
   cloud:
     nacos:
       discovery:
-        server-addr: 117.73.12.23:48848
+        server-addr: 127.0.0.1:8848
         username: nacos
-        password: Y123456a?
+        password: nacos
         namespace: dev
         group: sca
       config:
-        server-addr: 117.73.12.23:48848
+        server-addr: 127.0.0.1:8848
         username: nacos
-        password: Y123456a?
+        password: nacos
         namespace: dev
         group: sca
         file-extension: yml
   # 数据源配置
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://117.73.12.23:43306/sca_auth?useUnicode=true&characterEncoding=UTF-8&allowMultiQueries=true&rewriteBatchedStatements=true&useSSL=false&serverTimezone=GMT%2B8
+    url: jdbc:mysql://127.0.0.1:3306/sca_auth?useUnicode=true&characterEncoding=UTF-8&allowMultiQueries=true&rewriteBatchedStatements=true&useSSL=false&serverTimezone=GMT%2B8
     username: root
-    password: Y123456a
+    password: 123456
   flyway:
     enabled: true
     # 禁止清理数据库表
