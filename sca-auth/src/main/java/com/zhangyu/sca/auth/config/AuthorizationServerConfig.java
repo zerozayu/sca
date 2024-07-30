@@ -4,11 +4,11 @@ import com.nimbusds.jose.jwk.JWKSet;
 import com.nimbusds.jose.jwk.RSAKey;
 import com.nimbusds.jose.jwk.source.JWKSource;
 import com.nimbusds.jose.proc.SecurityContext;
+import lombok.AllArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
-import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.MediaType;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.config.Customizer;
@@ -28,19 +28,11 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
 import org.springframework.security.web.util.matcher.MediaTypeRequestMatcher;
 import org.springframework.security.web.util.matcher.RequestMatcher;
-import org.springframework.util.ResourceUtils;
 
-import javax.crypto.KeyGenerator;
-import javax.crypto.SecretKey;
-import java.io.FileInputStream;
-import java.io.InputStream;
-import java.net.URL;
-import java.security.*;
-import java.security.cert.Certificate;
+import java.security.KeyPair;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
 import java.util.UUID;
-import java.util.logging.Level;
 
 /**
  * Authorization Server 配置类
@@ -49,16 +41,14 @@ import java.util.logging.Level;
  * @date 2024/6/12 15:15
  */
 @Configuration(proxyBeanMethods = false)
+@AllArgsConstructor
 // @Import(OAuth2AuthorizationServerConfiguration.class)
 public class AuthorizationServerConfig {
 
     private static final String CUSTOM_CONSENT_PAGE_URI = "/oauth2/consent";
 
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
-
-    public AuthorizationServerConfig(BCryptPasswordEncoder bCryptPasswordEncoder) {
-        this.bCryptPasswordEncoder = bCryptPasswordEncoder;
-    }
+    private final KeyPair keyPair;
 
     /***
      * 针对协议端点的 Spring Security 过滤器链
@@ -167,7 +157,6 @@ public class AuthorizationServerConfig {
      */
     @Bean
     public JWKSource<SecurityContext> jwkSource() {
-        KeyPair keyPair = generateRsaKey();
         RSAPublicKey publicKey = (RSAPublicKey) keyPair.getPublic();
         RSAPrivateKey privateKey = (RSAPrivateKey) keyPair.getPrivate();
         RSAKey rsaKey = new RSAKey.Builder(publicKey)
@@ -205,38 +194,5 @@ public class AuthorizationServerConfig {
     @Bean
     public AuthorizationServerSettings authorizationServerSettings() {
         return AuthorizationServerSettings.builder().build();
-    }
-
-    private static KeyPair generateRsaKey() {
-        KeyPair keyPair;
-        try {
-            // 制定.p12文件路径及密码
-            String p12FilePath = "keystore/keystore.p12";
-            char[] password = "123456".toCharArray();
-
-            // 获取密钥库实例
-            KeyStore keyStore = KeyStore.getInstance("PKCS12");
-            // 加载
-            try (InputStream inputStream = ClassPathResource.class.getClassLoader().getResourceAsStream(p12FilePath)) {
-                keyStore.load(inputStream, password);
-            }
-
-            // 获取别名
-            String alias = keyStore.aliases().nextElement();
-
-            // 获取私钥
-            PrivateKey privateKey = (PrivateKey) keyStore.getKey(alias, password);
-
-            // 获取证书
-            Certificate certificate = keyStore.getCertificate(alias);
-
-            // 从证书中获取公钥
-            PublicKey publicKey = certificate.getPublicKey();
-
-            keyPair = new KeyPair(publicKey, privateKey);
-        } catch (Exception ex) {
-            throw new IllegalStateException(ex);
-        }
-        return keyPair;
     }
 }
