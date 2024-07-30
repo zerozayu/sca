@@ -8,6 +8,20 @@ spring:
     name: sca-gateway
   profiles:
     active: dev
+
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          # 获取 jwt 验签公钥的请求路径
+          jwk-set-uri: "https://localhost:41000/auth/api/get-public-key"
+  # redis
+  data:
+    redis:
+      host: localhost
+      port: 6379
+      password:
+      database: 0
   cloud:
     nacos:
       discovery:
@@ -23,3 +37,22 @@ spring:
         namespace: dev
         group: sca
         file-extension: yml
+    gateway:
+#      discovery:
+#        locator:
+#          enabled: true # 启用服务发现
+#          lower-case-service-id: true
+      routes:
+        - id: sca-auth-route # 当前路由的标识，要求唯一
+          uri: lb://sca-auth
+          order: 1 # 路由的优先级，数字越小优先级越高
+          predicates: # 断言，就是路由转发要满足的条件
+            - Path=/gateway/auth/**
+          filters: # 过滤器，请求在传递过程中可以通过过滤器进行一定的修改
+            - RewritePath=/gateway/auth/(?<remaining>.*), /auth/$\{remaining} # 重写路径并携带原始参数
+        - id: sca-order-route
+          uri: lb://sca-order
+          predicates:
+            - Path=/gateway/order
+          filters:
+            - StripPrefix=1 # 转发之前去掉一层路径
