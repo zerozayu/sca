@@ -13,6 +13,8 @@
     <name>${project.artifactId}</name>
     <modules>
         <module>sca-common-security</module>
+        <module>sca-common-core</module>
+        <module>sca-common-redis</module>
     </modules>
 
     <dependencies>

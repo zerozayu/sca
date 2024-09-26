@@ -1,0 +1,28 @@
+server:
+  port: 40000
+  servlet:
+    context-path: /gateway
+spring:
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          # 获取 jwt 验签公钥的请求路径
+          jwk-set-uri: "https://localhost:41000/auth/api/get-public-key"
+  # redis
+  data:
+    redis:
+      host: localhost
+      port: 6379
+      password:
+      database: 0
+      lettuce:
+        pool:
+          max-active: 10
+          max-idle: 5
+          min-idle: 0
+
+# 配置白名单
+white-list:
+  urls:
+    - "/auth/oauth2/token"

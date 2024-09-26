@@ -7,15 +7,20 @@
         <version>1.0.0</version>
     </parent>
 
-    <groupId>com.zhangyu.sca.common.security</groupId>
-    <artifactId>sca-common-security</artifactId>
+    <artifactId>sca-common-redis</artifactId>
     <packaging>jar</packaging>
 
     <name>${project.artifactId}</name>
 
-    <properties>
-    </properties>
-
     <dependencies>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-redis</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.zhangyu</groupId>
+            <artifactId>sca-common-core</artifactId>
+        </dependency>
+
     </dependencies>
 </project>
