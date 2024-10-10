@@ -24,6 +24,12 @@ public class SslConfig {
     private final ResourceLoader resourceLoader;
     private final SslProperties sslProperties;
 
+    // @Bean
+    // public KeyPair keyPair1() {
+    //     KeyStoreKeyFactory keyStoreKeyFactory = new KeyStoreKeyFactory(new ClassPathResource("jwt.jks"), "123456".toCharArray());
+    //     return keyStoreKeyFactory.getKeyPair("jwt", "123456".toCharArray());
+    // }
+
     @Bean
     public KeyPair keyPair() {
         return generateRsaKey();
