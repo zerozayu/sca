@@ -1,8 +1,28 @@
 server:
   port: 40000
-  servlet:
-    context-path: /gateway
+#  servlet:
+#    context-path: /gateway
 spring:
+  cloud:
+    gateway:
+      discovery:
+        locator:
+          enabled: true # 启用服务发现
+          lower-case-service-id: true
+      routes:
+        - id: sca-auth-route # 当前路由的标识，要求唯一
+          uri: lb://sca-auth
+          order: 1 # 路由的优先级，数字越小优先级越高
+          predicates: # 断言，就是路由转发要满足的条件
+            - Path=/auth/**
+#          filters: # 过滤器，请求在传递过程中可以通过过滤器进行一定的修改
+#            - RewritePath=/gateway/auth/(?<remaining>.*), /auth/$\{remaining} # 重写路径并携带原始参数
+        - id: sca-order-route
+          uri: lb://sca-module-order
+          predicates:
+            - Path=/order/**
+#          filters:
+#            - StripPrefix=1 # 转发之前去掉一层路径
   security:
     oauth2:
       resourceserver:
@@ -25,4 +45,5 @@ spring:
 # 配置白名单
 white-list:
   urls:
-    - "/auth/oauth2/token"
+    - /order/hello/sayHello
+    - /auth/**

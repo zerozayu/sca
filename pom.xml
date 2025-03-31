@@ -35,6 +35,7 @@
         <module>sca-gateway</module>
         <module>sca-auth</module>
         <module>sca-common</module>
+        <module>sca-module</module>
     </modules>
 
     <dependencyManagement>
