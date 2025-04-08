@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.zhangyu.sca.module.pay.mapper.SignInInfoMapper">
+
+    <resultMap id="BaseResultMap" type="com.zhangyu.sca.module.pay.domain.SignInInfo">
+            <id property="userId" column="user_id" />
+            <id property="signInDate" column="sign_in_date" />
+            <result property="signInDays" column="sign_in_days" />
+            <result property="continuousSignInDays" column="continuous_sign_in_days" />
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        user_id,sign_in_date,sign_in_days,continuous_sign_in_days,sign_in_calendar,resign_in_calendar
+    </sql>
+</mapper>

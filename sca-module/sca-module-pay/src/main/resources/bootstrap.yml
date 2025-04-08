@@ -1,0 +1,13 @@
+spring:
+  application:
+    name: sca-module-pay
+
+  cloud:
+    nacos:
+      discovery:
+        server-addr: 117.73.12.23:38848
+        username: nacos
+        password: zhangyu
+        namespace: dev
+        group: sca
+

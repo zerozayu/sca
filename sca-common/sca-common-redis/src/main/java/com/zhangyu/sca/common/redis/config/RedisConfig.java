@@ -42,9 +42,9 @@ public class RedisConfig implements CachingConfigurer {
         template.afterPropertiesSet();
         return template;
     }
-
-    @Bean
-    public RedisConnectionFactory redisConnectionFactory() {
-        return new LettuceConnectionFactory();
-    }
+    // 自定义 RedisConnectionFactory 会使yml 配置文件失效
+    // @Bean
+    // public RedisConnectionFactory redisConnectionFactory() {
+    //     return new LettuceConnectionFactory();
+    // }
 }

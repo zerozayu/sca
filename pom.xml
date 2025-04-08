@@ -27,6 +27,7 @@
         <commons.io.version>2.13.0</commons.io.version>
 
         <poi.version>4.1.2</poi.version>
+        <mybatis-plus-boot-starter.version>3.5.11</mybatis-plus-boot-starter.version>
     </properties>
 
     <packaging>pom</packaging>
@@ -119,6 +120,12 @@
                 <groupId>org.apache.poi</groupId>
                 <artifactId>poi-ooxml</artifactId>
                 <version>${poi.version}</version>
+            </dependency>
+            <!-- mybatis-plus -->
+            <dependency>
+                <groupId>com.baomidou</groupId>
+                <artifactId>mybatis-plus-spring-boot3-starter</artifactId>
+                <version>${mybatis-plus-boot-starter.version}</version>
             </dependency>
 
             <!-- 自定义依赖 -->

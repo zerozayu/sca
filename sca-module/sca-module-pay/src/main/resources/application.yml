@@ -1,0 +1,27 @@
+server:
+  port: 50001
+  servlet:
+    context-path: /pay
+
+# DataSource Config
+spring:
+  # 项目使用特定的文件编码
+  mandatory-file-encoding: UTF-8
+
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://117.73.12.23:33306/sca_pay?useSSL=true&serverTimezone=Asia/Shanghai&characterEncoding=utf-8&useUnicode=true&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false
+    username: root
+    password: zhangyu
+
+  data:
+    redis:
+      host: 117.73.12.23
+      port: 36379
+      password: zhangyu
+      database: 0
+
+logging:
+  level:
+    org.springframework.data.redis: DEBUG
+

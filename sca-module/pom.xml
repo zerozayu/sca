@@ -15,5 +15,6 @@
 
     <modules>
         <module>sca-module-order</module>
+        <module>sca-module-pay</module>
     </modules>
 </project>
