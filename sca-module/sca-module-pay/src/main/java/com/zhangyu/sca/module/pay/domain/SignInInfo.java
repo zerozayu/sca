@@ -1,8 +1,12 @@
 package com.zhangyu.sca.module.pay.domain;
 
+import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
+import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
+import lombok.Builder;
 import lombok.Data;
+import lombok.experimental.Accessors;
 
 import java.io.Serializable;
 
@@ -13,7 +17,16 @@ import java.io.Serializable;
  */
 @TableName(value = "pay_sign_in_info")
 @Data
+@Builder
+@Accessors(chain = true)
 public class SignInInfo implements Serializable {
+
+    /**
+     * 主键
+     */
+    @TableId(value = "id", type = IdType.NONE)
+    private Long Id;
+
     /**
      * 用户id
      */
@@ -23,8 +36,8 @@ public class SignInInfo implements Serializable {
     /**
      * 签到月份
      */
-    @TableField(value = "sign_in_date")
-    private String signInDate;
+    @TableField(value = "sign_in_month")
+    private String signInMonth;
 
     /**
      * 签到天数

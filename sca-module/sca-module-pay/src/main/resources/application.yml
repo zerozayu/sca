@@ -21,7 +21,11 @@ spring:
       password: zhangyu
       database: 0
 
+
 logging:
   level:
     org.springframework.data.redis: DEBUG
-
+mybatis-plus:
+  global-config:
+    db-config:
+      id-type: none
