@@ -8,6 +8,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
+ * 数据权限类型枚举类
+ *
  * @author zhangyu
  * @date 2024/6/20 17:49
  */
