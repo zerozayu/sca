@@ -2,23 +2,15 @@ package com.zhangyu.sca.auth.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
-import org.springframework.security.config.Customizer;
-import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
-import org.springframework.security.provisioning.JdbcUserDetailsManager;
-import org.springframework.security.provisioning.UserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
-import org.springframework.security.web.util.matcher.RequestMatcher;
 
 import javax.sql.DataSource;
 
@@ -28,7 +20,8 @@ import javax.sql.DataSource;
  * @author zhangyu
  * @date 2024/5/20 11:52
  */
-@EnableWebSecurity
+@EnableWebSecurity // 开启web安全
+@EnableMethodSecurity // 开启方法级别的安全
 @Configuration
 public class SecurityConfig {
 
@@ -49,9 +42,12 @@ public class SecurityConfig {
      */
     @Bean
     public SecurityFilterChain defaultSecurityFilterChain(HttpSecurity http) throws Exception {
+        // 禁用CSRF保护
         http
                 .csrf(AbstractHttpConfigurer::disable)
+                // 禁用CORS保护
                 .cors(AbstractHttpConfigurer::disable)
+                // 配置请求地址的权限
                 .authorizeHttpRequests((authorize -> authorize
                                 // 配置放行的请求
                                 .requestMatchers("/login").permitAll()
@@ -60,31 +56,20 @@ public class SecurityConfig {
                                 .anyRequest().authenticated()
                         )
                 )
-                // 设置登录表单页面
-                .formLogin(formLoginConfigurer -> formLoginConfigurer.loginPage("/login"));
+                .userDetailsService(inMemoryUserDetailsManager())
+                // 设置Form表单登录
+                .formLogin(formLoginConfigurer ->
+                        formLoginConfigurer
+                                .loginPage("/login"))
+        // 配置退出相关
+        // .logout(logoutConfigurer ->
+        //         logoutConfigurer.logoutUrl("/logout")
+        //                 .logoutSuccessUrl("/login")
+        //                 .permitAll())
+        ;
+
         return http.build();
     }
-
-    /**
-     * 初始化加密对象
-     * 此对象提供了一种不可逆的加密方式，相对于md5方式会更加安全
-     */
-    @Bean
-    public BCryptPasswordEncoder bCryptPasswordEncoder() {
-        return new BCryptPasswordEncoder();
-    }
-
-    // @Bean
-    // public UserDetailsService userDetailsService() {
-    //     UserDetails user = User.builder()
-    //             .username("zhangyu")
-    //             .password("123456")
-    //             .passwordEncoder(password -> bCryptPasswordEncoder().encode(password))
-    //             .roles("USER")
-    //             .build();
-    //
-    //     return new InMemoryUserDetailsManager(user);
-    // }
 
     /**
      * UserDetailsManager 继承了 UserDetailsService，
@@ -92,9 +77,32 @@ public class SecurityConfig {
      *
      * @return
      */
+    // @Bean
+    // public UserDetailsManager userDetailsManager() {
+    //     return new JdbcUserDetailsManager(dataSource);
+    // }
     @Bean
-    public UserDetailsManager userDetailsManager() {
-        return new JdbcUserDetailsManager(dataSource);
+    public InMemoryUserDetailsManager inMemoryUserDetailsManager() {
+        // 创建一个名为admin的用户，密码为admin，密码编码器为bCryptPasswordEncoder，角色为ADMIN
+        UserDetails admin = User.withUsername("admin")
+                .password("admin")
+                .passwordEncoder(password -> bCryptPasswordEncoder().encode(password))
+                .roles("ADMIN")
+                .build();
+        // 创建一个名为normal的用户，密码为normal，密码编码器为bCryptPasswordEncoder，角色为NORMAL
+        UserDetails normal = User.withUsername("normal")
+                .password("normal")
+                .passwordEncoder(password -> bCryptPasswordEncoder().encode(password))
+                .roles("NORMAL")
+                .build();
+
+        // 返回一个InMemoryUserDetailsManager，包含admin和normal两个用户
+        return new InMemoryUserDetailsManager(admin, normal);
+    }
+
+    @Bean
+    public BCryptPasswordEncoder bCryptPasswordEncoder() {
+        return new BCryptPasswordEncoder();
     }
 
     /**
