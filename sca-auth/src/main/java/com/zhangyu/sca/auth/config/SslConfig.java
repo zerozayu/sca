@@ -30,6 +30,11 @@ public class SslConfig {
     //     return keyStoreKeyFactory.getKeyPair("jwt", "123456".toCharArray());
     // }
 
+    /**
+     * 用于在启动时生成的密钥的实例JWKSource
+     *
+     * @return
+     */
     @Bean
     public KeyPair keyPair() {
         return generateRsaKey();

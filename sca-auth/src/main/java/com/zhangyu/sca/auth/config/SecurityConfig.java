@@ -6,10 +6,9 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.provisioning.InMemoryUserDetailsManager;
+import org.springframework.security.provisioning.JdbcUserDetailsManager;
+import org.springframework.security.provisioning.UserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 
 import javax.sql.DataSource;
@@ -32,7 +31,7 @@ public class SecurityConfig {
     }
 
     /**
-     * 用于身份验证的
+     * 用于身份验证的 Spring Security 过滤器链。
      *
      * @param http
      * @return {@link SecurityFilterChain}
@@ -56,7 +55,6 @@ public class SecurityConfig {
                                 .anyRequest().authenticated()
                         )
                 )
-                .userDetailsService(inMemoryUserDetailsManager())
                 // 设置Form表单登录
                 .formLogin(formLoginConfigurer ->
                         formLoginConfigurer
@@ -77,33 +75,36 @@ public class SecurityConfig {
      *
      * @return
      */
-    // @Bean
-    // public UserDetailsManager userDetailsManager() {
-    //     return new JdbcUserDetailsManager(dataSource);
-    // }
     @Bean
-    public InMemoryUserDetailsManager inMemoryUserDetailsManager() {
-        // 创建一个名为admin的用户，密码为admin，密码编码器为bCryptPasswordEncoder，角色为ADMIN
-        UserDetails admin = User.withUsername("admin")
-                .password("admin")
-                .passwordEncoder(password -> bCryptPasswordEncoder().encode(password))
-                .roles("ADMIN")
-                .build();
-        // 创建一个名为normal的用户，密码为normal，密码编码器为bCryptPasswordEncoder，角色为NORMAL
-        UserDetails normal = User.withUsername("normal")
-                .password("normal")
-                .passwordEncoder(password -> bCryptPasswordEncoder().encode(password))
-                .roles("NORMAL")
-                .build();
-
-        // 返回一个InMemoryUserDetailsManager，包含admin和normal两个用户
-        return new InMemoryUserDetailsManager(admin, normal);
+    public UserDetailsManager userDetailsManager() {
+        return new JdbcUserDetailsManager(dataSource);
     }
 
     @Bean
     public BCryptPasswordEncoder bCryptPasswordEncoder() {
         return new BCryptPasswordEncoder();
     }
+
+    // @Bean
+    // public InMemoryUserDetailsManager inMemoryUserDetailsManager() {
+    //     // 创建一个名为admin的用户，密码为admin，密码编码器为bCryptPasswordEncoder，角色为ADMIN
+    //     UserDetails admin = User.withUsername("admin")
+    //             .password("admin")
+    //             .passwordEncoder(password -> bCryptPasswordEncoder().encode(password))
+    //             .roles("ADMIN")
+    //             .build();
+    //     // 创建一个名为normal的用户，密码为normal，密码编码器为bCryptPasswordEncoder，角色为NORMAL
+    //     UserDetails normal = User.withUsername("normal")
+    //             .password("normal")
+    //             .passwordEncoder(password -> bCryptPasswordEncoder().encode(password))
+    //             .roles("NORMAL")
+    //             .build();
+    //
+    //     // 返回一个InMemoryUserDetailsManager，包含admin和normal两个用户
+    //     return new InMemoryUserDetailsManager(admin, normal);
+    // }
+    //
+
 
     /**
      * • 核心接口：AuthenticationManager 是 Spring Security 中的核心接口，用于管理认证的整个流程。
